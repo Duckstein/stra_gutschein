@@ -57,58 +57,61 @@ if ($vorname=="" OR $name=="" OR $strasse=="" OR $ort=="" OR $plz=="" OR $LKZ=="
 	
 	if (!$fehler){
 		
-		/* erzeuge datensatz
-		-------------------- */
+		/* --------------------------------- *\
 		
-		$now= getdate();
-		$datum= $now['year'].".".$now['mon'].".".$now['mday'];
-		
-		$zeit= time();
-		
-		$sql= "INSERT INTO STRA_gutscheine (id,anrede,name,vorname,strasse,hsnr,plz,ort,land,telefon,fax,email,wert,name_besch,nachricht,datum,zeit) VALUES ('','$anrede','$name','$vorname','$strasse','$hsnr','$plz','$ort','$LKZ','$telefon','$fax','$email','$wert','$beschenkt','$wunsch','$datum','$zeit');";
-		$resultat= mysql_query($sql,$db);
+			erzeuge datensatz
+			
+		\* --------------------------------- */
 		
 		
 		
 		
-		/* fetch datensatz
-		------------------ */
+		// create date'n'time
+		date_default_timezone_set("Europe/Berlin");
+		$timestamp = time();
+		$datum = date("d.m.Y",$timestamp);
+		$uhrzeit = date("H:i",$timestamp);
+		$jahr = date("Y",$timestamp);
 		
-		$sql= "SELECT * FROM STRA_gutscheine WHERE zeit=$zeit;";
-		$resultat=mysql_query($sql,$db);
+		
+		
+		
+		/* set gutschein nummer
+		----------------------- */
+		
+		// fetch latest datensatz
+		$sql = "SELECT * FROM STRA_gutscheine ORDER BY id DESC LIMIT 1";
+				
+		$resultat = mysql_query($sql,$db);
 		
 		$row = mysql_fetch_array($resultat);
+				
+		$id =		$row['id'];
+		$jahr_pre =	$row['jahr'];
+		$lfd =		$row['lfd'];
 		
-		$id=		$row['id'];
-		$anrede=	$row['anrede'];
-		$name=		$row['name'];
-		$vorname=	$row['vorname'];
-		$strasse=	$row['strasse'];
-		$hsnr=		$row['hsnr'];
-		$plz=		$row['plz'];
-		$ort=		$row['ort'];
-		$land=		$row['land'];
-		$telefon=	$row['telefon'];
-		$fax=		$row['fax'];
-		$email=		$row['email'];
-		$wert=		$row['wert'];
-		$beschenkt=	$row['name_besch'];
-		$datum=		$row['datum'];
-		$zeit=		$row['zeit'];
+		// compare today year w db entry year
+		if($jahr > $jahr_pre){
+			
+			// if it's a "new" year, set $lfd to 1
+			$lfd = "1";
+			
+		}else{
+			
+			// else count up $lfd
+			$lfd++;
+			
+		}
 		
-		/* 
-		 * hardcoded lfd-nr --> change by year!
-		 *
-		 * difference between id and lfd-nr: id=266, lfd=48 so 
-		 * $lfdnr= $id-218;
-		 * the next will be 267-218 = 49
-		 *
-		 */
-		$lfdnr= $id-218;
-		$nummer= "online-014-2015-".$lfdnr;
+		// transform $lfd (i.e. 23) into a three digit number (023)
+		$digitnummer = str_pad($lfd, 3, '0', STR_PAD_LEFT);
 		
-		$sql= "UPDATE STRA_gutscheine SET nummer='$nummer' WHERE id='$id'";		
-		$resultat= mysql_query($sql,$db) or die ("MySQL-Fehler: " . mysql_error());
+		// create voucher-nr
+		$voucher = "online-014-$jahr-$digitnummer";
+		
+		// write to db
+		$sql = "INSERT INTO STRA_gutscheine (id,jahr,lfd,nummer,anrede,name,vorname,strasse,hsnr,plz,ort,land,telefon,fax,email,wert,name_besch,nachricht,datum,zeit) VALUES ('','$jahr','$lfd','$voucher','$anrede','$name','$vorname','$strasse','$hsnr','$plz','$ort','$LKZ','$telefon','$fax','$email','$wert','$beschenkt','$wunsch','$datum','$zeit');";
+		$resultat = mysql_query($sql,$db);
 		
 		
 		
