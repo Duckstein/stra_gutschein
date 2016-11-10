@@ -19,7 +19,7 @@
 -------------- */
 
 $content.= '
-				<form method="post" action="http://' .$_SERVER['SERVER_NAME']. '/service/gutscheine_verarbeitung.php" target="_self" name="gutscheinbestellung" class="form-horizontal">
+				<form method="post" action="http://' .$_SERVER['SERVER_NAME']. '/service/gutscheine_pruefen.php" target="_self" name="gutscheinbestellung" class="form-horizontal">
 				
 					<legend><span class="badge">1.</span> Gutschein Daten</legend>
 					<div class="form-group form-group-lg">
